@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrintEase - Campus Printing</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-print"></i>
+                <span>PrintEase</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="active"><i class="fas fa-home"></i> Home</a>
+                <a href="upload.html"><i class="fas fa-upload"></i> Upload</a>
+                <a href="orders.html"><i class="fas fa-history"></i> Orders</a>
+                <a href="#"><i class="fas fa-user"></i> Profile</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Welcome Section -->
+        <section class="welcome-section">
+            <div class="welcome-card">
+                <h1>Welcome to PrintEase! 👋</h1>
+                <p class="subtitle">Print your documents without waiting in queues</p>
+                
+                <div class="user-info">
+                    <div class="avatar">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <div class="user-details">
+                        <h3>Rahul Sharma</h3>
+                        <p>MIT College • Student ID: MIT2023001</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="actions-section">
+            <h2>Quick Actions</h2>
+            <div class="action-cards">
+                <div class="action-card upload-card" onclick="window.location.href='upload.html'">
+                    <div class="action-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <h3>Upload & Print</h3>
+                    <p>Upload your document and get it printed</p>
+                    <button class="action-btn">Start Printing →</button>
+                </div>
+
+                <div class="action-card orders-card" onclick="window.location.href='orders.html'">
+                    <div class="action-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <h3>My Orders</h3>
+                    <p>Track your print orders</p>
+                    <button class="action-btn">View Orders →</button>
+                </div>
+
+                <div class="action-card status-card">
+                    <div class="action-icon">
+                        <i class="fas fa-running"></i>
+                    </div>
+                    <h3>Quick Pickup</h3>
+                    <p>Ready orders for pickup</p>
+                    <button class="action-btn">Check Status →</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Current Orders -->
+        <section class="orders-section">
+            <div class="section-header">
+                <h2>Current Orders</h2>
+                <a href="orders.html" class="view-all">View All →</a>
+            </div>
+            
+            <div class="orders-list">
+                <!-- Order 1 -->
+                <div class="order-card ready">
+                    <div class="order-status">
+                        <span class="status-badge ready-badge">
+                            <i class="fas fa-check-circle"></i> Ready
+                        </span>
+                        <span class="order-id">ORD-001</span>
+                    </div>
+                    <div class="order-details">
+                        <h4><i class="fas fa-file-pdf"></i> Calculus Notes.pdf</h4>
+                        <div class="order-meta">
+                            <span><i class="fas fa-copy"></i> 15 pages</span>
+                            <span><i class="fas fa-palette"></i> Black & White</span>
+                            <span><i class="fas fa-clock"></i> 10:30 AM</span>
+                        </div>
+                        <div class="order-price">
+                            <strong>₹25</strong>
+                            <button class="pickup-btn">Show QR for Pickup</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order 2 -->
+                <div class="order-card printing">
+                    <div class="order-status">
+                        <span class="status-badge printing-badge">
+                            <i class="fas fa-print"></i> Printing
+                        </span>
+                        <span class="order-id">ORD-002</span>
+                    </div>
+                    <div class="order-details">
+                        <h4><i class="fas fa-file-word"></i> Physics Lab.docx</h4>
+                        <div class="order-meta">
+                            <span><i class="fas fa-copy"></i> 8 pages</span>
+                            <span><i class="fas fa-palette"></i> Color</span>
+                            <span><i class="fas fa-clock"></i> 10:45 AM</span>
+                        </div>
+                        <div class="order-price">
+                            <strong>₹40</strong>
+                            <button class="track-btn">Track Order</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order 3 -->
+                <div class="order-card pending">
+                    <div class="order-status">
+                        <span class="status-badge pending-badge">
+                            <i class="fas fa-clock"></i> Pending
+                        </span>
+                        <span class="order-id">ORD-003</span>
+                    </div>
+                    <div class="order-details">
+                        <h4><i class="fas fa-file-powerpoint"></i> Project PPT.pptx</h4>
+                        <div class="order-meta">
+                            <span><i class="fas fa-copy"></i> 12 pages</span>
+                            <span><i class="fas fa-palette"></i> Black & White</span>
+                            <span><i class="fas fa-clock"></i> 11:00 AM</span>
+                        </div>
+                        <div class="order-price">
+                            <strong>₹20</strong>
+                            <button class="pay-btn">Complete Payment</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats -->
+        <section class="stats-section">
+            <div class="stats-card">
+                <div class="stat">
+                    <h3>12</h3>
+                    <p>Total Orders</p>
+                </div>
+                <div class="stat">
+                    <h3>₹285</h3>
+                    <p>Total Spent</p>
+                </div>
+                <div class="stat">
+                    <h3>8</h3>
+                    <p>Pages Today</p>
+                </div>
+                <div class="stat">
+                    <h3>45 min</h3>
+                    <p>Time Saved</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>PrintEase © 2024 • Campus Printing Made Easy</p>
+        <div class="footer-links">
+            <a href="#"><i class="fas fa-question-circle"></i> Help</a>
+            <a href="#"><i class="fas fa-phone"></i> Contact Shop</a>
+            <a href="#"><i class="fas fa-cog"></i> Settings</a>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
