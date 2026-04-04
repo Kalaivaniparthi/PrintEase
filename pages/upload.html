@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Print - PrintEase</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body class="app-body">
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="dashboard.html" class="brand">
+                <div class="brand-icon"><i class="fas fa-print"></i></div>
+                <span>Print<strong>Ease</strong></span>
+            </a>
+            <button class="sidebar-close" id="sidebarClose" onclick="closeSidebar()"><i class="fas fa-times"></i></button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i><span>Dashboard</span></a>
+            <a href="upload.html" class="nav-item active"><i class="fas fa-upload"></i><span>New Print</span></a>
+            <a href="orders.html" class="nav-item"><i class="fas fa-clipboard-list"></i><span>My Orders</span></a>
+            <a href="profile.html" class="nav-item"><i class="fas fa-user-circle"></i><span>Profile</span></a>
+            <a href="#" class="nav-item"><i class="fas fa-cog"></i><span>Settings</span></a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="sidebar-user" id="sidebarUser"></div>
+            <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+    </aside>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+    <main class="app-main">
+        <header class="topbar">
+            <button class="topbar-menu" onclick="openSidebar()"><i class="fas fa-bars"></i></button>
+            <div class="topbar-title">New Print Order</div>
+            <div class="topbar-right">
+                <div class="topbar-avatar" id="topbarAvatar"></div>
+            </div>
+        </header>
+
+        <div class="page-content">
+            <div class="progress-steps animate-fade-up">
+                <div class="ps-step active" id="ps1">
+                    <div class="ps-circle">1</div>
+                    <span>Upload File</span>
+                </div>
+                <div class="ps-line"></div>
+                <div class="ps-step" id="ps2">
+                    <div class="ps-circle">2</div>
+                    <span>Configure</span>
+                </div>
+                <div class="ps-line"></div>
+                <div class="ps-step" id="ps3">
+                    <div class="ps-circle">3</div>
+                    <span>Payment</span>
+                </div>
+            </div>
+
+            <div class="upload-layout">
+                <div class="upload-left">
+                    <div class="card animate-fade-up" style="animation-delay:0.1s">
+                        <div class="card-head"><i class="fas fa-cloud-upload-alt"></i> Upload Document</div>
+                        <div class="drop-zone" id="dropZone">
+                            <div class="dz-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                            <h3>Drag and drop your file here</h3>
+                            <p>PDF, DOC, DOCX, PPT, PPTX, JPG, PNG</p>
+                            <button type="button" class="btn-outline-sm" id="browseBtn">
+                                <i class="fas fa-folder-open"></i> Browse Files
+                            </button>
+                            <input type="file" id="fileInput" style="display:none" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.png">
+                        </div>
+                        <div class="file-preview" id="filePreview" style="display:none">
+                            <div class="fp-icon" id="fpIcon"><i class="fas fa-file"></i></div>
+                            <div class="fp-info">
+                                <strong id="fpName"></strong>
+                                <span id="fpSize"></span>
+                            </div>
+                            <button type="button" class="fp-remove" onclick="removeFile()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card animate-fade-up" style="animation-delay:0.2s">
+                        <div class="card-head"><i class="fas fa-sliders-h"></i> Print Settings</div>
+
+                        <div class="setting-row">
+                            <div class="setting-label">
+                                <i class="fas fa-palette"></i>
+                                <div>
+                                    <strong>Color Mode</strong>
+                                    <span id="colorRateHint">B&amp;W &#8377;3/page &bull; Color &#8377;6/page</span>
+                                </div>
+                            </div>
+                            <div class="toggle-group">
+                                <button class="tg-btn active" data-group="color" data-val="bw">B&W</button>
+                                <button class="tg-btn" data-group="color" data-val="color">Color</button>
+                            </div>
+                        </div>
+
+                        <div class="setting-row">
+                            <div class="setting-label">
+                                <i class="fas fa-copy"></i>
+                                <div>
+                                    <strong>Print Sides</strong>
+                                    <span>Single or double sided</span>
+                                </div>
+                            </div>
+                            <div class="toggle-group">
+                                <button class="tg-btn active" data-group="sides" data-val="single">Single</button>
+                                <button class="tg-btn" data-group="sides" data-val="double">Double</button>
+                            </div>
+                        </div>
+
+                        <div class="setting-row">
+                            <div class="setting-label">
+                                <i class="fas fa-expand-alt"></i>
+                                <div>
+                                    <strong>Paper Size</strong>
+                                    <span>A4 is standard</span>
+                                </div>
+                            </div>
+                            <div class="toggle-group">
+                                <button class="tg-btn active" data-group="size" data-val="A4">A4</button>
+                                <button class="tg-btn" data-group="size" data-val="A3">A3</button>
+                                <button class="tg-btn" data-group="size" data-val="Letter">Letter</button>
+                            </div>
+                        </div>
+
+                        <div class="setting-row">
+                            <div class="setting-label">
+                                <i class="fas fa-layer-group"></i>
+                                <div>
+                                    <strong>Copies</strong>
+                                    <span>PDF pages are counted automatically</span>
+                                </div>
+                            </div>
+                            <div class="counter">
+                                <button class="counter-btn" id="decBtn">-</button>
+                                <span id="copyCount">1</span>
+                                <button class="counter-btn" id="incBtn">+</button>
+                            </div>
+                        </div>
+
+                        <div class="setting-row">
+                            <div class="setting-label">
+                                <i class="fas fa-sticky-note"></i>
+                                <div>
+                                    <strong>Special Instructions</strong>
+                                    <span>Optional notes for the Xerox team</span>
+                                </div>
+                            </div>
+                        </div>
+                        <textarea id="instructions" placeholder="e.g. Staple top-left, keep original order..." class="notes-input"></textarea>
+                    </div>
+                </div>
+
+                <div class="upload-right">
+                    <div class="card price-card animate-fade-up" style="animation-delay:0.15s">
+                        <div class="card-head"><i class="fas fa-receipt"></i> Price Summary</div>
+
+                        <div class="price-rows">
+                            <div class="price-row">
+                                <span>Detected Pages</span>
+                                <span id="prPages">1</span>
+                            </div>
+                            <div class="price-row">
+                                <span>Color Mode</span>
+                                <span id="prMode">B&W</span>
+                            </div>
+                            <div class="price-row">
+                                <span>Rate</span>
+                                <span id="prRate">&#8377;3/page</span>
+                            </div>
+                            <div class="price-row">
+                                <span>Copies</span>
+                                <span id="prCopies">&times; 1</span>
+                            </div>
+                            <div class="price-divider"></div>
+                            <div class="price-row total-row">
+                                <span>Total</span>
+                                <span id="prTotal">&#8377;3</span>
+                            </div>
+                        </div>
+
+                        <div class="price-big">
+                            <span>&#8377;</span><span id="priceBig">3</span>
+                        </div>
+                        <p class="price-note" id="pageDetectNote">Amount is based on detected pages, copies, and color mode</p>
+
+                        <button class="btn-proceed" id="proceedBtn" onclick="proceedToPayment()">
+                            <i class="fas fa-arrow-right"></i> Proceed to Payment
+                        </button>
+
+                        <a href="dashboard.html" class="btn-back-link">
+                            <i class="fas fa-arrow-left"></i> Back to Dashboard
+                        </a>
+                    </div>
+
+                    <div class="card tips-card animate-fade-up" style="animation-delay:0.25s">
+                        <div class="card-head"><i class="fas fa-lightbulb"></i> Notes</div>
+                        <ul class="tips-list">
+                            <li><i class="fas fa-check"></i> Uploaded files stay empty until users add their own</li>
+                            <li><i class="fas fa-check"></i> PDF page count is detected automatically for accurate pricing</li>
+                            <li><i class="fas fa-check"></i> Staff will process your file after payment or counter confirmation</li>
+                            <li><i class="fas fa-check"></i> Max file size: 25 MB</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/app.js"></script>
+    <script>
+        requireAuth();
+        const user = getUser();
+        initSidebar(user);
+
+        if (user.role !== 'student') {
+            showToast('Only students can create new print jobs from this page.', 'warning');
+            setTimeout(() => goTo('dashboard'), 600);
+        }
+
+        let settings = { color: 'bw', sides: 'single', size: 'A4' };
+        let copies = 1;
+        let selectedFile = null;
+        let detectedPages = 1;
+        const fileIcons = {
+            pdf: 'fa-file-pdf',
+            doc: 'fa-file-word',
+            docx: 'fa-file-word',
+            ppt: 'fa-file-powerpoint',
+            pptx: 'fa-file-powerpoint',
+            jpg: 'fa-file-image',
+            png: 'fa-file-image'
+        };
+
+        function updatePrice() {
+            const rates = getPrintRates();
+            const amount = calculateAmount({ color: settings.color, copies, pages: detectedPages });
+            document.getElementById('colorRateHint').textContent = `B&W ${formatCurrency(rates.bw)}/page • Color ${formatCurrency(rates.color)}/page`;
+            document.getElementById('prPages').textContent = detectedPages;
+            document.getElementById('prMode').textContent = getRateLabel(settings.color);
+            document.getElementById('prRate').textContent = `${formatCurrency(rates[settings.color])}/page`;
+            document.getElementById('prCopies').textContent = `× ${copies}`;
+            document.getElementById('prTotal').textContent = formatCurrency(amount);
+            document.getElementById('priceBig').textContent = amount;
+            document.getElementById('ps2').classList.add('active');
+        }
+
+        document.querySelectorAll('.tg-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const group = this.dataset.group;
+                document.querySelectorAll(`[data-group="${group}"]`).forEach(item => item.classList.remove('active'));
+                this.classList.add('active');
+                settings[group] = this.dataset.val;
+                updatePrice();
+            });
+        });
+
+        document.getElementById('incBtn').addEventListener('click', () => {
+            copies += 1;
+            document.getElementById('copyCount').textContent = copies;
+            updatePrice();
+        });
+        document.getElementById('decBtn').addEventListener('click', () => {
+            if (copies > 1) copies -= 1;
+            document.getElementById('copyCount').textContent = copies;
+            updatePrice();
+        });
+
+        document.getElementById('browseBtn').addEventListener('click', () => document.getElementById('fileInput').click());
+        document.getElementById('fileInput').addEventListener('change', event => handleFile(event.target.files[0]));
+
+        const dropZone = document.getElementById('dropZone');
+        dropZone.addEventListener('dragover', event => {
+            event.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+        dropZone.addEventListener('drop', event => {
+            event.preventDefault();
+            dropZone.classList.remove('drag-over');
+            handleFile(event.dataTransfer.files[0]);
+        });
+
+        async function handleFile(file) {
+            if (!file) return;
+            selectedFile = file;
+            const ext = file.name.split('.').pop().toLowerCase();
+            const icon = fileIcons[ext] || 'fa-file';
+
+            document.getElementById('dropZone').style.display = 'none';
+            document.getElementById('filePreview').style.display = 'flex';
+            document.getElementById('fpIcon').innerHTML = `<i class="fas ${icon}"></i>`;
+            document.getElementById('fpName').textContent = file.name;
+            document.getElementById('fpSize').textContent = `${(file.size / 1024).toFixed(1)} KB`;
+            document.getElementById('ps1').classList.add('done');
+            document.getElementById('ps2').classList.add('active');
+            detectedPages = await detectPages(file, ext);
+            updatePrice();
+        }
+
+        function removeFile() {
+            selectedFile = null;
+            detectedPages = 1;
+            document.getElementById('dropZone').style.display = 'flex';
+            document.getElementById('filePreview').style.display = 'none';
+            document.getElementById('fileInput').value = '';
+            document.getElementById('pageDetectNote').textContent = 'Amount is based on detected pages, copies, and color mode';
+            updatePrice();
+        }
+
+        async function detectPages(file, ext) {
+            const note = document.getElementById('pageDetectNote');
+
+            if (ext === 'pdf') {
+                try {
+                    note.textContent = 'Detecting PDF pages automatically...';
+                    const pdfModule = await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs');
+                    pdfModule.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs';
+                    const buffer = await file.arrayBuffer();
+                    const pdf = await pdfModule.getDocument({ data: buffer }).promise;
+                    note.textContent = `Detected ${pdf.numPages} page(s) automatically from the PDF`;
+                    return pdf.numPages;
+                } catch (error) {
+                    note.textContent = 'Could not read PDF pages automatically, using 1 page as a fallback estimate';
+                    showToast('Could not detect PDF page count. Using 1 page estimate.', 'warning');
+                    return 1;
+                }
+            }
+
+            if (['jpg', 'jpeg', 'png'].includes(ext)) {
+                note.textContent = 'Image files are treated as 1 page each';
+                return 1;
+            }
+
+            note.textContent = 'Page auto-detection is exact for PDFs. Office files use a temporary 1-page estimate unless converted to PDF.';
+            showToast('For exact page counting, upload a PDF. Office files use a 1-page estimate in this version.', 'info');
+            return 1;
+        }
+
+        function proceedToPayment() {
+            if (!selectedFile) {
+                showToast('Please select a file first', 'error');
+                return;
+            }
+
+            const amount = calculateAmount({ color: settings.color, copies, pages: detectedPages });
+            const orderId = createOrderId();
+            const order = {
+                id: orderId,
+                file: selectedFile.name,
+                pages: detectedPages,
+                copies,
+                color: settings.color === 'bw' ? 'Black & White' : 'Color',
+                sides: settings.sides,
+                size: settings.size,
+                instructions: document.getElementById('instructions').value.trim(),
+                amount,
+                status: 'Pending',
+                paymentMethod: '',
+                paymentStatus: 'unpaid',
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+                userId: user.email,
+                ownerName: `${user.firstName} ${user.lastName}`
+            };
+
+            saveOrder(order);
+            document.getElementById('ps3').classList.add('active');
+            window.location.href = `payment.html?order=${orderId}&amount=${amount}`;
+        }
+
+        updatePrice();
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+

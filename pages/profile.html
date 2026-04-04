@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Redirect - PrintEase</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="app-body">
+    <main class="app-main">
+        <div class="page-content">
+            <div class="card animate-fade-up" style="max-width:520px;margin:5rem auto;text-align:center;">
+                <div class="card-head"><i class="fas fa-user-circle"></i> Opening Profile</div>
+                <p class="subtitle">Redirecting to the correct role profile...</p>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
+    <script src="../js/app.js"></script>
+    <script>
+        requireAuth();
+        const user = getUser();
+        window.location.replace(getRoleProfilePage(user.role));
+    </script>
+</body>
+</html>
