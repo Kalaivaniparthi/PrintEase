@@ -75,6 +75,7 @@
     </main>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script src="../js/app.js"></script>
     <script>
         requireAuth();
@@ -91,10 +92,21 @@
             action.title = 'Dashboard';
         }
 
+        // Real-time Socket.io — re-render on any order update
+        connectSocket((data) => {
+            showToast(`Order ${data.orderId} → ${data.status}`, 'info');
+            renderOrders();
+        });
+
         let currentFilter = 'All';
 
-        function renderOrders() {
-            const allOrders = getOrdersForUser(user);
+        async function renderOrders() {
+            let allOrders = [];
+            try {
+                allOrders = await apiGetOrders();
+            } catch (err) {
+                showToast('Failed to load orders: ' + err.message, 'error');
+            }
             const filtered = currentFilter === 'All' ? allOrders : allOrders.filter(order => order.status === currentFilter);
             const list = document.getElementById('ordersList');
 
@@ -118,21 +130,21 @@
         function updateStats(allOrders) {
             if (user.role === 'student') {
                 document.getElementById('osTotal').textContent = allOrders.length;
-                document.getElementById('osSpent').textContent = formatCurrency(allOrders.reduce((sum, order) => sum + (order.amount || 0), 0));
-                document.getElementById('osPages').textContent = allOrders.reduce((sum, order) => sum + (order.copies || 0), 0);
+                document.getElementById('osSpent').textContent = formatCurrency(allOrders.reduce((sum, o) => sum + (o.amount || 0), 0));
+                document.getElementById('osPages').textContent = allOrders.reduce((sum, o) => sum + (o.copies || 0), 0);
             } else if (user.role === 'staff') {
-                document.getElementById('osTotal').textContent = allOrders.filter(order => order.status === 'Pending').length;
-                document.getElementById('osSpent').textContent = allOrders.filter(order => order.status === 'Printing').length;
-                document.getElementById('osPages').textContent = allOrders.filter(order => order.status === 'Ready').length;
+                document.getElementById('osTotal').textContent = allOrders.filter(o => o.status === 'Pending').length;
+                document.getElementById('osSpent').textContent = allOrders.filter(o => o.status === 'Printing').length;
+                document.getElementById('osPages').textContent = allOrders.filter(o => o.status === 'Ready').length;
                 document.getElementById('osTotalLabel').textContent = 'Pending Jobs';
                 document.getElementById('osSpentLabel').textContent = 'Printing';
                 document.getElementById('osPagesLabel').textContent = 'Ready for Pickup';
             } else {
                 document.getElementById('osTotal').textContent = allOrders.length;
                 document.getElementById('osSpent').textContent = formatCurrency(allOrders
-                    .filter(order => order.paymentStatus && order.paymentStatus !== 'unpaid')
-                    .reduce((sum, order) => sum + (order.amount || 0), 0));
-                document.getElementById('osPages').textContent = allOrders.reduce((sum, order) => sum + (order.copies || 0), 0);
+                    .filter(o => o.payment?.status === 'paid')
+                    .reduce((sum, o) => sum + (o.amount || 0), 0));
+                document.getElementById('osPages').textContent = allOrders.reduce((sum, o) => sum + (o.copies || 0), 0);
                 document.getElementById('osSpentLabel').textContent = 'Revenue';
                 document.getElementById('osPagesLabel').textContent = 'Copies Requested';
             }
@@ -148,6 +160,8 @@
         });
 
         renderOrders();
+        // Fallback poll every 30s
+        setInterval(renderOrders, 30000);
     </script>
 </body>
 </html>

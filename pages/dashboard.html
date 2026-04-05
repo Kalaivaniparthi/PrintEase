@@ -148,114 +148,98 @@
         </div>
     </main>
 
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script src="../js/app.js"></script>
     <script>
         requireAuth();
-
         const user = getUser();
         initSidebar(user);
-
-        const visibleOrders = getOrdersForUser(user);
-        const allOrders = getOrders();
-        const users = getUsers();
-        const staffMembers = users.filter(item => item.role === 'staff');
-        const students = users.filter(item => item.role === 'student');
 
         const hour = new Date().getHours();
         const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
         document.getElementById('welcomeMsg').textContent = `${greeting}, ${user.firstName}!`;
         document.getElementById('ordersNavLabel').textContent = user.role === 'student' ? 'My Orders' : 'Operations';
-        document.getElementById('profileNavLink').href = getRoleProfilePage(user.role);
 
-        const topActionBtn = document.getElementById('topActionBtn');
+        const topActionBtn  = document.getElementById('topActionBtn');
         const heroActionBtn = document.getElementById('heroActionBtn');
-        const qaPrimary = document.getElementById('qaPrimary');
-        const qaSecondary = document.getElementById('qaSecondary');
-        const qaTertiary = document.getElementById('readyPickupCard');
-        const recentHeading = document.getElementById('recentHeading');
+        const qaPrimary     = document.getElementById('qaPrimary');
+        const qaSecondary   = document.getElementById('qaSecondary');
+        const qaTertiary    = document.getElementById('readyPickupCard');
 
-        if (user.role === 'student') {
-            const totalSpent = visibleOrders.reduce((sum, order) => sum + (order.amount || 0), 0);
-            const totalCopies = visibleOrders.reduce((sum, order) => sum + (order.copies || 0), 0);
-            const readyCount = visibleOrders.filter(order => order.status === 'Ready').length;
+        // Real-time socket — refresh dashboard on any order update
+        connectSocket(() => loadDashboard());
 
-            document.getElementById('welcomeSub').textContent = visibleOrders.length
-                ? `You have ${readyCount} order(s) ready and ${visibleOrders.filter(order => order.status === 'Pending').length} waiting for payment or processing.`
-                : 'Upload your first file when you are ready.';
-            document.getElementById('statTotalOrders').textContent = visibleOrders.length;
-            document.getElementById('statSpent').textContent = formatCurrency(totalSpent);
-            document.getElementById('statThird').textContent = totalCopies;
-            document.getElementById('statFourth').textContent = `${visibleOrders.length * 10} min`;
+        async function loadDashboard() {
+            let orders = [];
+            try { orders = await apiGetOrders(); } catch {}
 
-            if (readyCount > 0) {
+            if (user.role === 'student') {
+                const readyCount   = orders.filter(o => o.status === 'Ready').length;
+                const pendingCount = orders.filter(o => o.status === 'Pending').length;
+                document.getElementById('welcomeSub').textContent = orders.length
+                    ? `You have ${readyCount} order(s) ready and ${pendingCount} pending.`
+                    : 'Upload your first file when you are ready.';
+                document.getElementById('statTotalOrders').textContent = orders.length;
+                document.getElementById('statSpent').textContent = formatCurrency(orders.reduce((s, o) => s + (o.amount || 0), 0));
+                document.getElementById('statThird').textContent = orders.reduce((s, o) => s + (o.copies || 0), 0);
+                document.getElementById('statFourth').textContent = `${orders.length * 10} min`;
+                if (readyCount > 0) {
+                    qaTertiary.style.display = 'block';
+                    document.getElementById('qaTertiaryText').textContent = `${readyCount} order${readyCount > 1 ? 's are' : ' is'} ready to collect`;
+                }
+            } else if (user.role === 'staff') {
+                document.getElementById('welcomeSub').textContent = 'Run the live print queue and move jobs through to completion.';
+                document.getElementById('statTotalOrders').textContent = orders.length;
+                document.getElementById('statSpent').textContent = orders.filter(o => o.status === 'Printing').length;
+                document.getElementById('statThird').textContent = orders.filter(o => o.status === 'Ready').length;
+                document.getElementById('statFourth').textContent = orders.filter(o => o.status === 'Pending').length;
+                document.getElementById('statSpentLabel').textContent = 'Printing Now';
+                document.getElementById('statThirdLabel').textContent = 'Ready for Pickup';
+                document.getElementById('statFourthLabel').textContent = 'Pending Jobs';
+                topActionBtn.onclick = () => window.location.href = 'orders.html';
+                heroActionBtn.href = 'orders.html';
+                heroActionBtn.innerHTML = '<i class="fas fa-list-check"></i> Open Queue';
+                qaPrimary.onclick = () => window.location.href = 'orders.html';
+                document.getElementById('qaPrimaryTitle').textContent = 'Process Queue';
+                document.getElementById('qaPrimaryText').textContent = 'Start pending jobs, mark ready, close completed pickups';
                 qaTertiary.style.display = 'block';
-                document.getElementById('qaTertiaryTitle').textContent = 'Ready for Pickup';
-                document.getElementById('qaTertiaryText').textContent = `${readyCount} order${readyCount > 1 ? 's are' : ' is'} ready to collect`;
+                document.getElementById('qaTertiaryTitle').textContent = 'Queue Overview';
+                document.getElementById('qaTertiaryText').textContent = `${orders.filter(o => o.status === 'Pending').length} pending jobs waiting`;
+            } else {
+                const revenue = orders.filter(o => o.payment?.status === 'paid').reduce((s, o) => s + (o.amount || 0), 0);
+                document.getElementById('welcomeSub').textContent = 'Monitor your Xerox operation, revenue, and queue health.';
+                document.getElementById('statTotalOrders').textContent = orders.length;
+                document.getElementById('statSpent').textContent = formatCurrency(revenue);
+                document.getElementById('statThird').textContent = orders.filter(o => o.status === 'Ready').length;
+                document.getElementById('statFourth').textContent = orders.filter(o => o.status === 'Printing').length;
+                document.getElementById('statSpentLabel').textContent = 'Revenue';
+                document.getElementById('statThirdLabel').textContent = 'Ready for Pickup';
+                document.getElementById('statFourthLabel').textContent = 'Printing Now';
+                topActionBtn.onclick = () => window.location.href = 'orders.html';
+                heroActionBtn.href = 'orders.html';
+                heroActionBtn.innerHTML = '<i class="fas fa-chart-line"></i> Review Operations';
+                qaPrimary.onclick = () => window.location.href = 'orders.html';
+                document.getElementById('qaPrimaryTitle').textContent = 'All Orders';
+                document.getElementById('qaPrimaryText').textContent = 'Inspect every order, payment state, and print status';
+                qaTertiary.style.display = 'block';
+                document.getElementById('qaTertiaryTitle').textContent = 'Business Snapshot';
+                document.getElementById('qaTertiaryText').textContent = `${orders.filter(o => o.status === 'Ready').length} ready, ${orders.filter(o => o.status === 'Printing').length} printing`;
             }
-        } else if (user.role === 'staff') {
-            document.getElementById('welcomeSub').textContent = 'Run the live print queue, move jobs through printing, and hand completed jobs to students.';
-            document.getElementById('statTotalOrders').textContent = allOrders.length;
-            document.getElementById('statSpent').textContent = allOrders.filter(order => order.status === 'Printing').length;
-            document.getElementById('statThird').textContent = allOrders.filter(order => order.status === 'Ready').length;
-            document.getElementById('statFourth').textContent = staffMembers.length || 1;
-            document.getElementById('statSpentLabel').textContent = 'Printing Now';
-            document.getElementById('statThirdLabel').textContent = 'Ready for Pickup';
-            document.getElementById('statFourthLabel').textContent = 'Active Staff';
-            topActionBtn.onclick = () => window.location.href = 'orders.html';
-            heroActionBtn.href = 'orders.html';
-            heroActionBtn.innerHTML = '<i class="fas fa-list-check"></i> Open Queue';
-            qaPrimary.onclick = () => window.location.href = 'orders.html';
-            qaSecondary.onclick = () => window.location.href = getRoleProfilePage(user.role);
-            document.getElementById('qaPrimaryTitle').textContent = 'Process Queue';
-            document.getElementById('qaPrimaryText').textContent = 'Start pending jobs, mark ready jobs, and close completed pickups';
-            document.getElementById('qaSecondaryTitle').textContent = 'Staff Profile';
-            document.getElementById('qaSecondaryText').textContent = 'View your staff identity, role, and assigned responsibilities';
-            qaTertiary.style.display = 'block';
-            qaTertiary.onclick = () => window.location.href = 'orders.html';
-            document.getElementById('qaTertiaryTitle').textContent = 'Queue Overview';
-            document.getElementById('qaTertiaryText').textContent = `${allOrders.filter(order => order.status === 'Pending').length} pending jobs still waiting`;
-            recentHeading.textContent = 'Live Queue Snapshot';
-        } else {
-            const revenue = allOrders
-                .filter(order => order.paymentStatus && order.paymentStatus !== 'unpaid')
-                .reduce((sum, order) => sum + (order.amount || 0), 0);
-            document.getElementById('welcomeSub').textContent = 'Monitor your Xerox operation, revenue flow, and overall queue health from one place.';
-            document.getElementById('statTotalOrders').textContent = allOrders.length;
-            document.getElementById('statSpent').textContent = formatCurrency(revenue);
-            document.getElementById('statThird').textContent = students.length;
-            document.getElementById('statFourth').textContent = staffMembers.length;
-            document.getElementById('statSpentLabel').textContent = 'Revenue Captured';
-            document.getElementById('statThirdLabel').textContent = 'Students';
-            document.getElementById('statFourthLabel').textContent = 'Staff Members';
-            topActionBtn.onclick = () => window.location.href = 'orders.html';
-            heroActionBtn.href = 'orders.html';
-            heroActionBtn.innerHTML = '<i class="fas fa-chart-line"></i> Review Operations';
-            qaPrimary.onclick = () => window.location.href = 'orders.html';
-            qaSecondary.onclick = () => window.location.href = getRoleProfilePage(user.role);
-            document.getElementById('qaPrimaryTitle').textContent = 'All Orders';
-            document.getElementById('qaPrimaryText').textContent = 'Inspect every student order, payment state, and current print status';
-            document.getElementById('qaSecondaryTitle').textContent = 'Owner Profile';
-            document.getElementById('qaSecondaryText').textContent = 'Check your account details and owner access level';
-            qaTertiary.style.display = 'block';
-            qaTertiary.onclick = () => window.location.href = 'orders.html';
-            document.getElementById('qaTertiaryTitle').textContent = 'Business Snapshot';
-            document.getElementById('qaTertiaryText').textContent = `${allOrders.filter(order => order.status === 'Ready').length} orders ready and ${allOrders.filter(order => order.status === 'Printing').length} in print`;
-            recentHeading.textContent = 'Business Snapshot';
+
+            // Recent orders
+            const recent = orders.slice(0, 3);
+            const container = document.getElementById('recentOrders');
+            container.innerHTML = recent.length
+                ? recent.map(o => orderCardHTML(o, user.role)).join('')
+                : `<div class="empty-state">
+                        <i class="fas fa-print"></i>
+                        <h3>No activity yet</h3>
+                        <p>${user.role === 'student' ? 'Place your first order to start printing.' : 'Orders will appear here when students upload files.'}</p>
+                        ${user.role === 'student' ? '<a href="upload.html" class="btn-primary-sm">Start Printing</a>' : ''}
+                   </div>`;
         }
 
-        const recentOrders = (user.role === 'student' ? visibleOrders : allOrders).slice(0, 3);
-        const container = document.getElementById('recentOrders');
-        if (!recentOrders.length) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-print"></i>
-                    <h3>No activity yet</h3>
-                    <p>${user.role === 'student' ? 'Place your first order to start printing.' : 'Orders will appear here when students begin uploading files.'}</p>
-                    ${user.role === 'student' ? '<a href="upload.html" class="btn-primary-sm">Start Printing</a>' : ''}
-                </div>`;
-        } else {
-            container.innerHTML = recentOrders.map(order => orderCardHTML(order, user.role)).join('');
-        }
+        loadDashboard();
     </script>
 </body>
 </html>

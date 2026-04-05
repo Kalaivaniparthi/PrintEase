@@ -227,6 +227,7 @@
         let settings = { color: 'bw', sides: 'single', size: 'A4' };
         let copies = 1;
         let selectedFile = null;
+        let uploadedFile = null;   // real Cloudinary file object
         let detectedPages = 1;
         const fileIcons = {
             pdf: 'fa-file-pdf',
@@ -300,6 +301,29 @@
             document.getElementById('fpSize').textContent = `${(file.size / 1024).toFixed(1)} KB`;
             document.getElementById('ps1').classList.add('done');
             document.getElementById('ps2').classList.add('active');
+
+            // Upload to Cloudinary via backend with progress
+            try {
+                document.getElementById('pageDetectNote').textContent = 'Uploading to cloud...';
+                const progressBar = document.createElement('div');
+                progressBar.id = 'uploadProgress';
+                progressBar.style.cssText = 'height:4px;background:#667eea;border-radius:4px;transition:width 0.3s;width:0%;margin-top:0.5rem;';
+                document.getElementById('filePreview').appendChild(progressBar);
+
+                uploadedFile = await apiUploadFile(file, (pct) => {
+                    progressBar.style.width = pct + '%';
+                    document.getElementById('pageDetectNote').textContent = `Uploading... ${pct}%`;
+                });
+
+                progressBar.remove();
+                document.getElementById('pageDetectNote').textContent = '✅ File uploaded to cloud successfully';
+                showToast('File uploaded successfully!', 'success');
+            } catch (err) {
+                showToast('Upload failed: ' + err.message, 'error');
+                removeFile();
+                return;
+            }
+
             detectedPages = await detectPages(file, ext);
             updatePrice();
         }
@@ -343,36 +367,36 @@
             return 1;
         }
 
-        function proceedToPayment() {
-            if (!selectedFile) {
-                showToast('Please select a file first', 'error');
+        async function proceedToPayment() {
+            if (!selectedFile || !uploadedFile) {
+                showToast('Please select and upload a file first', 'error');
                 return;
             }
 
-            const amount = calculateAmount({ color: settings.color, copies, pages: detectedPages });
-            const orderId = createOrderId();
-            const order = {
-                id: orderId,
-                file: selectedFile.name,
-                pages: detectedPages,
-                copies,
-                color: settings.color === 'bw' ? 'Black & White' : 'Color',
-                sides: settings.sides,
-                size: settings.size,
-                instructions: document.getElementById('instructions').value.trim(),
-                amount,
-                status: 'Pending',
-                paymentMethod: '',
-                paymentStatus: 'unpaid',
-                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
-                userId: user.email,
-                ownerName: `${user.firstName} ${user.lastName}`
-            };
+            const btn = document.getElementById('proceedBtn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating order...';
+            btn.disabled = true;
 
-            saveOrder(order);
-            document.getElementById('ps3').classList.add('active');
-            window.location.href = `payment.html?order=${orderId}&amount=${amount}`;
+            try {
+                const amount = calculateAmount({ color: settings.color, copies, pages: detectedPages });
+                const order = await apiCreateOrder({
+                    file: uploadedFile,
+                    pages: detectedPages,
+                    copies,
+                    color: settings.color === 'bw' ? 'Black & White' : 'Color',
+                    sides: settings.sides,
+                    size: settings.size,
+                    instructions: document.getElementById('instructions').value.trim(),
+                    amount
+                });
+
+                document.getElementById('ps3').classList.add('active');
+                window.location.href = `payment.html?order=${order.orderId}&amount=${order.amount}`;
+            } catch (err) {
+                showToast('Failed to create order: ' + err.message, 'error');
+                btn.innerHTML = '<i class="fas fa-arrow-right"></i> Proceed to Payment';
+                btn.disabled = false;
+            }
         }
 
         updatePrice();
