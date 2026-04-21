@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ocean Guard - Fisher Portal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fisher_style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+</head>
+<body>
+    <div class="fisher-container">
+        <!-- Sidebar Navigation -->
+        <aside class="fisher-sidebar">
+            <div class="sidebar-header">
+                <span class="logo-icon">🌊</span>
+                <h1>Ocean Guard</h1>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#dashboard" class="nav-item active" onclick="switchSection('dashboard', event)">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#report" class="nav-item" onclick="switchSection('report', event)">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>Report Dumping</span>
+                </a>
+                <a href="#my-reports" class="nav-item" onclick="switchSection('my-reports', event)">
+                    <i class="fas fa-list"></i>
+                    <span>My Reports</span>
+                </a>
+                <a href="#qr-rewards" class="nav-item" onclick="switchSection('qr-rewards', event)">
+                    <i class="fas fa-qrcode"></i>
+                    <span>QR Bag Rewards</span>
+                </a>
+                <a href="#map" class="nav-item" onclick="switchSection('map', event)">
+                    <i class="fas fa-map"></i>
+                    <span>Live Map</span>
+                </a>
+                <a href="#leaderboard" class="nav-item" onclick="switchSection('leaderboard', event)">
+                    <i class="fas fa-trophy"></i>
+                    <span>Leaderboard</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="/logout" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="fisher-main">
+            <!-- Top Bar -->
+            <div class="fisher-topbar">
+                <div class="topbar-left">
+                    <button class="menu-toggle" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+                <div class="topbar-right">
+                    <div class="user-info">
+                        <span id="userName">Welcome, Fisherman</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Section -->
+            <section id="dashboard-section" class="fisher-section active">
+                <div class="dashboard-header">
+                    <h2>Welcome, <span id="fisherName">Muthu</span>! 🎣</h2>
+                    <p class="subtitle">Village: <span id="fisherVillage">Nagapattinam</span></p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon rewards">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Total Rewards Earned</h3>
+                            <p class="stat-value">₹<span id="totalRewards">1,240</span></p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon reports">
+                            <i class="fas fa-clipboard"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Total Reports Filed</h3>
+                            <p class="stat-value"><span id="totalReports">5</span></p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon verified">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Verified Reports</h3>
+                            <p class="stat-value"><span id="verifiedReports">3</span></p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon plastic">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Plastic Collected (QR Bags)</h3>
+                            <p class="stat-value"><span id="plasticCollected">15</span> kg</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quick-actions">
+                    <h3>Quick Actions</h3>
+                    <div class="action-buttons">
+                        <button class="action-btn" onclick="switchSection('report', event)">
+                            <i class="fas fa-exclamation-circle"></i>
+                            Report Dumping Incident
+                        </button>
+                        <button class="action-btn" onclick="switchSection('qr-rewards', event)">
+                            <i class="fas fa-qrcode"></i>
+                            Request QR Bags
+                        </button>
+                        <button class="action-btn" onclick="switchSection('leaderboard', event)">
+                            <i class="fas fa-trophy"></i>
+                            View Leaderboard
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Report Dumping Section -->
+            <section id="report-section" class="fisher-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-exclamation-circle"></i> Report Dumping Incident</h2>
+                    <p>Help us fight marine pollution. Report suspicious dumping activities.</p>
+                </div>
+
+                <div class="form-container">
+                    <form id="reportForm" onsubmit="submitReport(event)">
+                        <div class="form-group">
+                            <label for="boatId">Boat ID *</label>
+                            <input type="text" id="boatId" name="boatId" required placeholder="e.g., TN-2024-001">
+                            <small>The registration number of the suspicious boat</small>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="latitude">Latitude *</label>
+                                <input type="number" id="latitude" name="latitude" step="0.0001" required placeholder="9.1234">
+                            </div>
+                            <div class="form-group">
+                                <label for="longitude">Longitude *</label>
+                                <input type="number" id="longitude" name="longitude" step="0.0001" required placeholder="79.8765">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="location">Or Select Known Area *</label>
+                            <select id="location" name="location" required>
+                                <option value="">Choose a location...</option>
+                                <option value="Tuticorin">Tuticorin</option>
+                                <option value="Rameswaram">Rameswaram</option>
+                                <option value="Nagapattinam">Nagapattinam</option>
+                                <option value="Mandapam">Mandapam</option>
+                                <option value="Kanyakumari">Kanyakumari</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="incidentDate">Date & Time of Incident *</label>
+                            <input type="datetime-local" id="incidentDate" name="incidentDate" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Description *</label>
+                            <textarea id="description" name="description" rows="5" required placeholder="Describe what you observed, type of waste, boat behavior, etc."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="photoUpload">Photo Evidence (Optional)</label>
+                            <div class="file-upload">
+                                <input type="file" id="photoUpload" name="photoUpload" accept="image/*">
+                                <span class="upload-text"><i class="fas fa-cloud-upload-alt"></i> Click to upload or drag and drop</span>
+                            </div>
+                            <small>Maximum file size: 5MB. Supported formats: JPG, PNG</small>
+                        </div>
+
+                        <button type="submit" class="submit-btn">
+                            <i class="fas fa-paper-plane"></i> Submit Report
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- My Reports Section -->
+            <section id="my-reports-section" class="fisher-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-list"></i> My Reports</h2>
+                </div>
+
+                <div class="reports-table-container">
+                    <table id="reportsTable" class="reports-table">
+                        <thead>
+                            <tr>
+                                <th>Report ID</th>
+                                <th>Boat ID</th>
+                                <th>Location</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Reward</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportsTableBody">
+                            <tr>
+                                <td colspan="7" class="loading">Loading your reports...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- QR Bag Rewards Section -->
+            <section id="qr-rewards-section" class="fisher-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-qrcode"></i> QR Bag Rewards Program</h2>
+                </div>
+
+                <div class="qr-rewards-container">
+                    <div class="qr-info">
+                        <h3>Earn Rewards with Plastic Collection</h3>
+                        <p>Bring plastic waste collected from the ocean to your harbor in our special QR-coded bags. 
+                           Each kilogram of plastic collected earns you ₹20 in rewards.</p>
+                        
+                        <div class="qr-stats">
+                            <div class="qr-stat">
+                                <h4>This Month</h4>
+                                <p class="qr-value"><span id="monthPlastic">15</span> kg</p>
+                                <small>Plastic Collected</small>
+                            </div>
+                            <div class="qr-stat">
+                                <h4>This Month</h4>
+                                <p class="qr-value">₹<span id="monthRewards">300</span></p>
+                                <small>Rewards Earned</small>
+                            </div>
+                        </div>
+
+                        <button class="request-btn" onclick="requestQRBags()">
+                            <i class="fas fa-box"></i> Request QR Bags
+                        </button>
+                    </div>
+
+                    <div class="qr-code-section">
+                        <h3>Your Unique QR Code</h3>
+                        <div class="qr-placeholder">
+                            <i class="fas fa-qrcode"></i>
+                            <p>QR Code for FISH-001</p>
+                            <small>Scan at harbor weighing station</small>
+                        </div>
+                        <p class="qr-instruction">Show this code when submitting plastic waste to verify your collection.</p>
+                    </div>
+                </div>
+
+                <div class="qr-how-it-works">
+                    <h3>How It Works</h3>
+                    <ol>
+                        <li><strong>Request Bags:</strong> Click "Request QR Bags" to receive special bags with your unique QR code</li>
+                        <li><strong>Collect Plastic:</strong> Gather plastic waste from the ocean during your regular fishing</li>
+                        <li><strong>Submit at Harbor:</strong> Bring filled bags to the designated harbor collection point</li>
+                        <li><strong>Verification:</strong> Staff will scan your QR code and weigh the plastic</li>
+                        <li><strong>Earn Rewards:</strong> Get ₹20 per kilogram instantly to your account</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- Live Map Section -->
+            <section id="map-section" class="fisher-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-map"></i> Live Map - My Fishing Area</h2>
+                </div>
+
+                <div id="fisherMap" class="fisher-map"></div>
+
+                <div class="map-info">
+                    <h3>Map Legend</h3>
+                    <div class="legend">
+                        <div class="legend-item">
+                            <span class="legend-marker your-location"></span> Your Current Location
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-marker dumping"></span> Recent Dumping Reports
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-marker safe-zone"></span> Safe Fishing Zone
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Leaderboard Section -->
+            <section id="leaderboard-section" class="fisher-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-trophy"></i> Leaderboard</h2>
+                </div>
+
+                <div class="leaderboard-container">
+                    <div class="leaderboard-category">
+                        <h3><i class="fas fa-coins"></i> Top Rewards Earners</h3>
+                        <table class="leaderboard-table">
+                            <thead>
+                                <tr>
+                                    <th class="rank">#</th>
+                                    <th>Fisherman</th>
+                                    <th>Village</th>
+                                    <th>Rewards</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rewardsLeaderboard">
+                                <tr>
+                                    <td colspan="4" class="loading">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="leaderboard-category">
+                        <h3><i class="fas fa-clipboard"></i> Top Report Filers</h3>
+                        <table class="leaderboard-table">
+                            <thead>
+                                <tr>
+                                    <th class="rank">#</th>
+                                    <th>Fisherman</th>
+                                    <th>Village</th>
+                                    <th>Reports</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportsLeaderboard">
+                                <tr>
+                                    <td colspan="4" class="loading">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div class="success-content">
+                <i class="fas fa-check-circle"></i>
+                <h2 id="modalTitle">Success!</h2>
+                <p id="modalMessage">Your report has been submitted successfully.</p>
+                <p class="reference-id">Reference ID: <strong id="referenceId">REPORT-001</strong></p>
+                <button class="modal-btn" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/fisher_script.js') }}"></script>
+</body>
+</html>

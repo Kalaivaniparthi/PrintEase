@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ocean Guard - Admin Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <span class="logo-icon">🌊</span>
+                <h1>Ocean Guard</h1>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#dashboard" class="nav-item active" onclick="switchSection('dashboard', event)">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#map" class="nav-item" onclick="switchSection('map', event)">
+                    <i class="fas fa-map"></i>
+                    <span>Live Map</span>
+                </a>
+                <a href="#analysis" class="nav-item" onclick="switchSection('analysis', event)">
+                    <i class="fas fa-brain"></i>
+                    <span>AI Analysis</span>
+                </a>
+                <a href="#patrols" class="nav-item" onclick="switchSection('patrols', event)">
+                    <i class="fas fa-helicopter"></i>
+                    <span>Patrol Management</span>
+                </a>
+                <a href="#reports" class="nav-item" onclick="switchSection('reports', event)">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Reports</span>
+                </a>
+                <a href="#settings" class="nav-item" onclick="switchSection('settings', event)">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="/logout" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <div class="topbar">
+                <div class="topbar-left">
+                    <button class="menu-toggle" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+                <div class="topbar-right">
+                    <div class="notifications">
+                        <button class="notification-btn">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge">3</span>
+                        </button>
+                    </div>
+                    <div class="user-info">
+                        <span>Welcome, Admin</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Dashboard Section -->
+                <section id="dashboard-section" class="section active">
+                    <h2>Dashboard Overview</h2>
+                    
+                    <!-- Statistics Cards -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon boats">
+                                <i class="fas fa-ship"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>Total Boats Tracked</h3>
+                                <p class="stat-value" data-stat="total_boats">35</p>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon high-risk">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>High-Risk Boats</h3>
+                                <p class="stat-value" data-stat="high_risk_boats">8</p>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon reports">
+                                <i class="fas fa-clipboard"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>Pending Reports</h3>
+                                <p class="stat-value" data-stat="pending_reports">12</p>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon patrols">
+                                <i class="fas fa-helicopter"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>Active Patrols</h3>
+                                <p class="stat-value" data-stat="active_patrols">4</p>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon rewards">
+                                <i class="fas fa-coins"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>Rewards Distributed</h3>
+                                <p class="stat-value" data-stat="total_rewards">₹42,800</p>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon plastic">
+                                <i class="fas fa-leaf"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>Plastic Collected</h3>
+                                <p class="stat-value" data-stat="plastic_collected">214 kg</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div class="charts-row">
+                        <div class="chart-card">
+                            <h3>Risk Distribution</h3>
+                            <canvas id="riskChart"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Dumping Trend (Last 7 Days)</h3>
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Live Map Section -->
+                <section id="map-section" class="section">
+                    <h2>Live Map - Gulf of Mannar</h2>
+                    
+                    <div class="map-controls">
+                        <label>Filter by Risk Level:</label>
+                        <select id="riskFilter" onchange="filterBoats()">
+                            <option value="all">All Boats</option>
+                            <option value="high_risk">High Risk</option>
+                            <option value="warning">Warning</option>
+                            <option value="safe">Safe</option>
+                        </select>
+                    </div>
+
+                    <div id="liveMap" class="live-map"></div>
+
+                    <div class="map-legend">
+                        <div class="legend-item">
+                            <span class="legend-color high-risk"></span> High Risk Boat
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color warning"></span> Warning Boat
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color safe"></span> Safe Boat
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-zone"></span> Dumping Zone
+                        </div>
+                    </div>
+                </section>
+
+                <!-- AI Analysis Section -->
+                <section id="analysis-section" class="section">
+                    <h2>AI Analysis & Insights</h2>
+
+                    <button class="btn btn-primary" onclick="runAnalysis()">
+                        <i class="fas fa-sync"></i> Run AI Analysis
+                    </button>
+
+                    <div class="analysis-insights">
+                        <h3>Latest Insights</h3>
+                        <div id="insightsList" class="insights-list">
+                            <p class="loading">Loading insights...</p>
+                        </div>
+                    </div>
+
+                    <div class="analysis-table">
+                        <h3>Top 10 High-Risk Boats</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Boat ID</th>
+                                    <th>Village</th>
+                                    <th>Risk Score</th>
+                                    <th>Status</th>
+                                    <th>Plastic Dumped (kg)</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topRiskTable">
+                                <tr><td colspan="6" class="loading">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Patrol Management Section -->
+                <section id="patrols-section" class="section">
+                    <h2>Patrol Management</h2>
+
+                    <button class="btn btn-primary" onclick="showDeployPatrolModal()">
+                        <i class="fas fa-helicopter"></i> Deploy Patrol
+                    </button>
+
+                    <div class="patrols-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Patrol ID</th>
+                                    <th>Assigned Area</th>
+                                    <th>Boats Assigned</th>
+                                    <th>Officer Name</th>
+                                    <th>Status</th>
+                                    <th>Deployed At</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="patrolsTable">
+                                <tr><td colspan="7" class="loading">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Reports Section -->
+                <section id="reports-section" class="section">
+                    <h2>Community Reports</h2>
+
+                    <div class="reports-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Report ID</th>
+                                    <th>Reporter</th>
+                                    <th>Location</th>
+                                    <th>Description</th>
+                                    <th>Status</th>
+                                    <th>Reward Status</th>
+                                    <th>Submitted</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportsTable">
+                                <tr><td colspan="8" class="loading">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Settings Section -->
+                <section id="settings-section" class="section">
+                    <h2>Settings & Configuration</h2>
+
+                    <div class="settings-grid">
+                        <div class="settings-card">
+                            <h3>Reward Configuration</h3>
+                            <form onsubmit="saveSettings(event)">
+                                <div class="form-group">
+                                    <label>Reward per kg (₹)</label>
+                                    <input type="number" id="rewardPerKg" min="1" value="20" required>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="settings-card">
+                            <h3>Risk Score Thresholds (%)</h3>
+                            <form onsubmit="saveSettings(event)">
+                                <div class="form-group">
+                                    <label>High Risk Threshold</label>
+                                    <input type="number" id="highThreshold" min="0" max="100" value="71" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Medium Risk Threshold</label>
+                                    <input type="number" id="mediumThreshold" min="0" max="100" value="40" required>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="settings-card">
+                            <h3>Alert Settings</h3>
+                            <form onsubmit="saveSettings(event)">
+                                <div class="form-group checkbox">
+                                    <input type="checkbox" id="emailAlerts" checked>
+                                    <label for="emailAlerts">Email Alerts</label>
+                                </div>
+                                <div class="form-group checkbox">
+                                    <input type="checkbox" id="smsAlerts" checked>
+                                    <label for="smsAlerts">SMS Alerts</label>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-primary" onclick="saveAllSettings()">
+                        <i class="fas fa-save"></i> Save Settings
+                    </button>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Deploy Patrol Modal -->
+    <div id="deployPatrolModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeDeployPatrolModal()">&times;</span>
+            <h2>Deploy New Patrol</h2>
+            <form onsubmit="deployPatrol(event)">
+                <div class="form-group">
+                    <label>Select Area</label>
+                    <select id="patrolArea" required>
+                        <option value="">Select an area...</option>
+                        <option value="Tuticorin Zone">Tuticorin Zone</option>
+                        <option value="Gulf of Mannar">Gulf of Mannar</option>
+                        <option value="Mandapam Area">Mandapam Area</option>
+                        <option value="Kanyakumari Waters">Kanyakumari Waters</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Deploy Patrol</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/admin_script.js') }}"></script>
+</body>
+</html>

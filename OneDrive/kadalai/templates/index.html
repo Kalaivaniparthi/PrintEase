@@ -3,381 +3,224 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KADALAI - AI Marine Plastic Prevention</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a2a3a; overflow: hidden; }
-        
-        #map { position: absolute; top: 0; bottom: 0; left: 0; right: 380px; height: 100vh; }
-        
-        .dashboard {
-            position: fixed;
-            top: 0;
-            right: 0;
-            width: 380px;
-            height: 100vh;
-            background: white;
-            box-shadow: -2px 0 20px rgba(0,0,0,0.2);
-            z-index: 1000;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .dashboard-header {
-            background: linear-gradient(135deg, #006994, #004d66);
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .dashboard-header h1 { margin: 0; font-size: 24px; }
-        .dashboard-header p { margin: 8px 0 0; font-size: 12px; opacity: 0.9; }
-        
-        .stats-container { padding: 20px; flex: 1; }
-        
-        .stat-card {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 12px;
-            border-left: 4px solid;
-            transition: transform 0.2s;
-            cursor: pointer;
-        }
-        
-        .stat-card:hover { transform: translateX(-5px); }
-        
-        .stat-title { font-size: 12px; color: #666; margin-bottom: 8px; }
-        .stat-value { font-size: 28px; font-weight: bold; color: #2c3e50; }
-        .stat-unit { font-size: 12px; color: #999; }
-        
-        .section-title {
-            font-size: 14px;
-            font-weight: bold;
-            margin: 20px 0 12px 0;
-            color: #2c3e50;
-            border-bottom: 2px solid #e67e22;
-            padding-bottom: 5px;
-        }
-        
-        .risk-list { max-height: 280px; overflow-y: auto; margin-bottom: 15px; }
-        
-        .risk-item {
-            background: #fff5f0;
-            padding: 12px;
-            margin-bottom: 8px;
-            border-radius: 8px;
-            cursor: pointer;
-            border-left: 3px solid #dc3545;
-            transition: all 0.2s;
-        }
-        
-        .risk-item:hover { background: #ffe0b5; transform: translateX(-3px); }
-        .risk-item strong { color: #dc3545; font-size: 14px; }
-        .risk-item small { font-size: 11px; color: #666; }
-        
-        .refresh-btn {
-            background: #e67e22;
-            color: white;
-            border: none;
-            padding: 12px;
-            margin: 0 20px 15px 20px;
-            cursor: pointer;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 14px;
-            transition: background 0.3s;
-        }
-        
-        .refresh-btn:hover { background: #d35400; }
-        
-        .timestamp {
-            text-align: center;
-            font-size: 10px;
-            color: #999;
-            padding: 12px;
-            border-top: 1px solid #eee;
-            background: #fafafa;
-        }
-        
-        .badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 10px;
-            font-weight: bold;
-            margin-left: 8px;
-        }
-        .badge-danger { background: #dc3545; color: white; }
-        .badge-success { background: #28a745; color: white; }
-        .badge-warning { background: #ffc107; color: #333; }
-        
-        @media (max-width: 768px) {
-            #map { right: 0; bottom: 380px; }
-            .dashboard { top: auto; bottom: 0; width: 100%; height: 380px; }
-        }
-    </style>
+    <title>Ocean Guard - Marine Pollution Prevention System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <div id="map"></div>
-    
-    <div class="dashboard">
-        <div class="dashboard-header">
-            <h1>🌊 KADALAI</h1>
-            <p>AI-Powered Marine Plastic Prevention | Gulf of Mannar, Tamil Nadu</p>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-icon">🌊</span>
+                <span class="logo-text">Ocean Guard</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home" class="nav-link active">Home</a></li>
+                <li><a href="#admin" class="nav-link">Admin Dashboard</a></li>
+                <li><a href="#fisher" class="nav-link">Fisher Portal</a></li>
+                <li><a href="#map" class="nav-link">Live Map</a></li>
+            </ul>
+            <div class="nav-auth-btn">
+                <button class="login-btn" onclick="toggleLoginModal()">Login</button>
+            </div>
         </div>
-        
-        <div class="stats-container" id="statsContainer">
-            <div style="text-align: center; padding: 40px;">⏳ Loading dashboard...</div>
-        </div>
-        
-        <button class="refresh-btn" onclick="location.reload()">🔄 REFRESH DATA</button>
-        <div class="timestamp" id="timestamp">Loading data from backend...</div>
+    </nav>
+
+    <!-- Animated Wave Background -->
+    <div class="wave-container">
+        <svg class="waves" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M0,50 Q300,0 600,50 T1200,50 L1200,120 L0,120 Z" class="wave wave-1"></path>
+            <path d="M0,60 Q300,20 600,60 T1200,60 L1200,120 L0,120 Z" class="wave wave-2"></path>
+            <path d="M0,70 Q300,30 600,70 T1200,70 L1200,120 L0,120 Z" class="wave wave-3"></path>
+        </svg>
     </div>
 
-    <script>
-        let map, boatMarkers = [];
-        
-        // Dumping zones from SDMRI Gulf of Mannar Survey 2023
-        const dumpingZones = [
-            { lat: 8.95, lng: 78.55, name: 'Tuticorin Offshore', risk: 'Critical', area: '548 m² debris' },
-            { lat: 9.45, lng: 79.65, name: 'Gulf of Mannar Core', risk: 'High', area: '1,152 m² affected' },
-            { lat: 9.35, lng: 79.40, name: 'Mandapam Reef', risk: 'High', area: 'Ghost nets reported' },
-            { lat: 8.65, lng: 78.30, name: 'Kanyakumari Waters', risk: 'Medium', area: 'Plastic accumulation' },
-            { lat: 10.65, lng: 80.30, name: 'Nagai Basin', risk: 'High', area: 'Fishing debris hotspot' }
-        ];
-        
-        // Fishing villages
-        const villages = [
-            { name: 'Nagapattinam', lat: 10.7649, lng: 79.8428 },
-            { name: 'Thoothukudi', lat: 8.7642, lng: 78.1348 },
-            { name: 'Rameswaram', lat: 9.2876, lng: 79.3129 },
-            { name: 'Kanyakumari', lat: 8.0883, lng: 77.5385 },
-            { name: 'Mandapam', lat: 9.2833, lng: 79.1167 }
-        ];
-        
-        // Initialize map
-        function initMap() {
-            map = L.map('map').setView([9.0, 79.0], 8);
-            
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; OpenStreetMap contributors | Data: SDMRI 2023',
-                subdomains: 'abcd',
-                maxZoom: 19
-            }).addTo(map);
-            
-            // Add dumping zones (red circles)
-            dumpingZones.forEach(zone => {
-                const color = zone.risk === 'Critical' ? '#dc3545' : zone.risk === 'High' ? '#ff4444' : '#ff884d';
-                L.circle([zone.lat, zone.lng], {
-                    radius: 15000,
-                    color: color,
-                    fillColor: color,
-                    fillOpacity: 0.35,
-                    weight: 3
-                }).addTo(map).bindPopup(`
-                    <div style="min-width: 220px;">
-                        <b style="color: #dc3545;">⚠️ ${zone.name}</b><br>
-                        Risk: ${zone.risk}<br>
-                        Area: ${zone.area}<br>
-                        <i>Source: SDMRI Gulf of Mannar Survey 2023</i>
-                    </div>
-                `);
-            });
-            
-            // Add villages
-            villages.forEach(village => {
-                L.marker([village.lat, village.lng]).addTo(map)
-                    .bindPopup(`
-                        <b>🏘️ ${village.name}</b><br>
-                        Coastal Fishing Village<br>
-                        <i>AI Monitoring Active</i>
-                    `);
-            });
-        }
-        
-        // Fetch and display boats
-        async function loadBoats() {
-            try {
-                const response = await fetch('/api/boats');
-                const boats = await response.json();
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="toggleLoginModal()">&times;</span>
+            <div class="login-container">
+                <h2>🔐 Ocean Guard Login</h2>
                 
-                // Clear existing markers
-                boatMarkers.forEach(marker => map.removeLayer(marker));
-                boatMarkers = [];
-                
-                boats.forEach(boat => {
-                    let emoji, popupHtml, tooltipText;
-                    
-                    if (boat.status === 'dumping') {
-                        emoji = '🔴🚤';
-                        popupHtml = `
-                            <div style="min-width: 280px; padding: 8px;">
-                                <h3 style="color: #dc3545; margin: 0 0 8px 0;">🔴 ${boat.id}</h3>
-                                <hr style="margin: 5px 0;">
-                                <b>📍 Village:</b> ${boat.village}<br>
-                                <b>⚠️ Risk Score:</b> <span style="color: red; font-size: 20px; font-weight: bold;">${boat.risk_score}%</span><br>
-                                <b>🔴 Status:</b> DUMPING SUSPECTED<br>
-                                <b>🗑️ Plastic Dumped:</b> ${boat.plastic_dumped} kg<br>
-                                <b>📊 Detection:</b> Speed drop + Night stop + Dumping zone<br>
-                                <hr style="margin: 5px 0;">
-                                <b>⚠️ Action:</b> Alert Fisheries Department
-                            </div>
-                        `;
-                        tooltipText = `🔴 ${boat.id} - ${boat.risk_score}% - DUMPING`;
-                    } else if (boat.status === 'warning') {
-                        emoji = '🟡🚤';
-                        popupHtml = `
-                            <div style="min-width: 280px; padding: 8px;">
-                                <h3 style="color: #ff9800; margin: 0 0 8px 0;">🟡 ${boat.id}</h3>
-                                <hr style="margin: 5px 0;">
-                                <b>📍 Village:</b> ${boat.village}<br>
-                                <b>⚠️ Risk Score:</b> <span style="color: orange; font-size: 18px;">${boat.risk_score}%</span><br>
-                                <b>🟡 Status:</b> UNDER OBSERVATION<br>
-                                <b>🗑️ Plastic Dumped:</b> ${boat.plastic_dumped} kg<br>
-                                <hr style="margin: 5px 0;">
-                                <b>📢 Action:</b> Increase monitoring frequency
-                            </div>
-                        `;
-                        tooltipText = `🟡 ${boat.id} - ${boat.risk_score}% - MONITOR`;
-                    } else {
-                        emoji = '🟢🚤';
-                        popupHtml = `
-                            <div style="min-width: 280px; padding: 8px;">
-                                <h3 style="color: #28a745; margin: 0 0 8px 0;">🟢 ${boat.id}</h3>
-                                <hr style="margin: 5px 0;">
-                                <b>📍 Village:</b> ${boat.village}<br>
-                                <b>✅ Risk Score:</b> ${boat.risk_score}%<br>
-                                <b>🟢 Status:</b> CERTIFIED CLEAN<br>
-                                <b>♻️ Plastic Collected:</b> ${boat.plastic_collected} kg<br>
-                                <b>💰 Reward Earned:</b> <span style="color: green; font-size: 16px;">₹${boat.reward.toLocaleString()}</span>
-                                <hr style="margin: 5px 0;">
-                                <b>🏆 Status:</b> Eligible for Monthly Bonus
-                            </div>
-                        `;
-                        tooltipText = `🟢 ${boat.id} - ${boat.risk_score}% - CLEAN`;
-                    }
-                    
-                    const marker = L.marker([boat.lat, boat.lng], {
-                        icon: L.divIcon({ 
-                            html: `<div style="font-size: 26px; text-shadow: 1px 1px 0 white;">${emoji}</div>`, 
-                            iconSize: [32, 32],
-                            className: 'boat-marker'
-                        })
-                    }).addTo(map).bindPopup(popupHtml).bindTooltip(tooltipText);
-                    
-                    boatMarkers.push(marker);
-                });
-            } catch (error) {
-                console.error('Error loading boats:', error);
-            }
-        }
-        
-        // Fetch and update dashboard
-        async function loadDashboard() {
-            try {
-                const statsRes = await fetch('/api/stats');
-                const stats = await statsRes.json();
-                
-                const boatsRes = await fetch('/api/boats');
-                const boats = await boatsRes.json();
-                const highRiskBoats = boats.filter(b => b.risk_score > 70).sort((a,b) => b.risk_score - a.risk_score);
-                
-                const dashboardHtml = `
-                    <div class="stat-card" style="border-left-color: #006994;" onclick="alert('Total fishing boats being monitored by AI')">
-                        <div class="stat-title">🚢 TOTAL BOATS TRACKED</div>
-                        <div class="stat-value">${stats.total_boats}</div>
-                        <div class="stat-unit">active vessels</div>
-                    </div>
-                    
-                    <div class="stat-card" style="border-left-color: #dc3545;" onclick="alert('Boats with 70%+ risk score - immediate action needed')">
-                        <div class="stat-title">🔴 DUMPING EVENTS (HIGH RISK)</div>
-                        <div class="stat-value">${stats.dumping_boats}</div>
-                        <div class="stat-unit">suspected dumping boats</div>
-                    </div>
-                    
-                    <div class="stat-card" style="border-left-color: #ffc107;" onclick="alert('Boats with 40-70% risk score - increased monitoring')">
-                        <div class="stat-title">🟡 SUSPENDED BOATS</div>
-                        <div class="stat-value">${stats.warning_boats}</div>
-                        <div class="stat-unit">under observation</div>
-                    </div>
-                    
-                    <div class="stat-card" style="border-left-color: #28a745;" onclick="alert('Boats with low risk score - rewarded for clean behavior')">
-                        <div class="stat-title">🟢 CLEAN BOATS</div>
-                        <div class="stat-value">${stats.clean_boats}</div>
-                        <div class="stat-unit">rewarded</div>
-                    </div>
-                    
-                    <div class="stat-card" style="border-left-color: #e67e22;" onclick="alert('Total ₹ paid to fishermen for bringing plastic waste')">
-                        <div class="stat-title">💰 REWARDS DISTRIBUTED</div>
-                        <div class="stat-value">₹${stats.total_rewards.toLocaleString()}</div>
-                    </div>
-                    
-                    <div class="stat-card" style="border-left-color: #17a2b8;" onclick="alert('Total plastic waste brought back by fishermen')">
-                        <div class="stat-title">♻️ PLASTIC COLLECTED</div>
-                        <div class="stat-value">${stats.plastic_collected} <span class="stat-unit">kg</span></div>
-                    </div>
-                    
-                    <div class="stat-card" style="border-left-color: #20c997;" onclick="alert('Marine animals saved from plastic entanglement')">
-                        <div class="stat-title">🐠 MARINE ANIMALS SAVED</div>
-                        <div class="stat-value">${stats.animals_saved}</div>
-                    </div>
-                    
-                    <div class="section-title">⚠️ HIGH RISK BOATS (Priority)</div>
-                    <div class="risk-list">
-                        ${highRiskBoats.length > 0 ? highRiskBoats.map(boat => `
-                            <div class="risk-item" onclick="alert('Boat: ${boat.id}\\nVillage: ${boat.village}\\nRisk Score: ${boat.risk_score}%\\nPlastic Dumped: ${boat.plastic_dumped} kg\\nAction: Alert Fisheries Department immediately!')">
-                                <strong>🔴 ${boat.id}</strong> <span class="badge badge-danger">${boat.risk_score}%</span><br>
-                                <small>${boat.village} | Dumped: ${boat.plastic_dumped}kg</small>
-                            </div>
-                        `).join('') : '<div style="padding: 20px; text-align: center; color: #999;">✅ No high risk boats detected</div>'}
-                    </div>
-                `;
-                
-                document.getElementById('statsContainer').innerHTML = dashboardHtml;
-                document.getElementById('timestamp').innerHTML = `📊 Last Updated: ${new Date().toLocaleString()}<br>📌 Data Source: SDMRI Gulf of Mannar Survey 2023 | Backend: SQLite Database`;
-                
-            } catch (error) {
-                console.error('Error loading dashboard:', error);
-                document.getElementById('statsContainer').innerHTML = '<div style="padding: 40px; text-align: center; color: red;">❌ Error loading data. Make sure backend is running.</div>';
-            }
-        }
-        
-        // Initialize everything
-        initMap();
-        loadBoats();
-        loadDashboard();
-        
-        // Auto-refresh every 30 seconds
-        setInterval(() => {
-            loadBoats();
-            loadDashboard();
-        }, 30000);
-        
-        // Add legend to map
-        setTimeout(() => {
-            const legend = L.control({ position: 'bottomleft' });
-            legend.onAdd = function() {
-                const div = L.DomUtil.create('div', 'info legend');
-                div.innerHTML = `
-                    <div style="background: white; padding: 10px 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); font-size: 12px;">
-                        <b>📌 LEGEND</b><br>
-                        🔴 Red Circle = Dumping Zone (SDMRI Data)<br>
-                        🟢🚤 Green Boat = Clean Boat (Rewarded)<br>
-                        🟡🚤 Yellow Boat = Under Observation<br>
-                        🔴🚤 Red Boat = Dumping Suspect<br>
-                        🔵 Marker = Fishing Village<br>
-                        <hr style="margin: 5px 0;">
-                        <i>Click on any marker for details</i>
-                    </div>
-                `;
-                return div;
-            };
-            legend.addTo(map);
-        }, 1000);
-    </script>
+                <div class="login-tabs">
+                    <button class="tab-btn active" onclick="switchTab('admin-login')">Admin</button>
+                    <button class="tab-btn" onclick="switchTab('fisher-login')">Fisher</button>
+                </div>
+
+                <!-- Admin Login -->
+                <div id="admin-login" class="login-tab active">
+                    <form onsubmit="handleAdminLogin(event)">
+                        <p class="dummy-account">Demo: <strong>admin / admin123</strong></p>
+                        <input type="text" placeholder="Username" id="adminUsername" required>
+                        <input type="password" placeholder="Password" id="adminPassword" required>
+                        <button type="submit" class="login-submit-btn">Login as Admin</button>
+                    </form>
+                </div>
+
+                <!-- Fisher Login -->
+                <div id="fisher-login" class="login-tab">
+                    <form onsubmit="handleFisherLogin(event)">
+                        <p class="dummy-account">Demo: <strong>fisheries / fisheries123</strong></p>
+                        <input type="text" placeholder="Username" id="fisherUsername" required>
+                        <input type="password" placeholder="Password" id="fisherPassword" required>
+                        <button type="submit" class="login-submit-btn">Login as Fisher</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Ocean Guard</h1>
+            <h2 class="hero-subtitle">3-Layer Marine Pollution Prevention System</h2>
+            <p class="hero-tagline">🛰️ GPS Tracking | 👥 Community Reporting | 🛡️ Coast Guard Coordination</p>
+            <button class="cta-button" onclick="toggleLoginModal()">Get Started</button>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section class="statistics">
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-icon">🚢</div>
+                <div class="stat-value" data-target="35">0</div>
+                <div class="stat-label">Boats Tracked</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">♻️</div>
+                <div class="stat-value" data-target="500">0</div>
+                <div class="stat-label">Tons of Plastic Prevented</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📋</div>
+                <div class="stat-value" data-target="127">0</div>
+                <div class="stat-label">Reports Filed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🚁</div>
+                <div class="stat-value" data-target="4">0</div>
+                <div class="stat-label">Active Patrols</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Three Layers Section -->
+    <section class="layers">
+        <h2 class="section-title">How Ocean Guard Works</h2>
+        <div class="layers-container">
+            <!-- Layer 1 -->
+            <div class="layer-card">
+                <div class="layer-header layer-1">
+                    <div class="layer-number">1</div>
+                </div>
+                <div class="layer-content">
+                    <h3>GPS + AIS Tracking</h3>
+                    <div class="layer-icon">🛰️</div>
+                    <p>24/7 AI-powered monitoring of fishing vessels using GPS and AIS data. Detects suspicious behavior, unusual stops, and dumping patterns.</p>
+                    <ul class="layer-features">
+                        <li>✓ Real-time position tracking</li>
+                        <li>✓ Abnormal behavior detection</li>
+                        <li>✓ Risk score calculation</li>
+                        <li>✓ Automated alerts</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Layer 2 -->
+            <div class="layer-card">
+                <div class="layer-header layer-2">
+                    <div class="layer-number">2</div>
+                </div>
+                <div class="layer-content">
+                    <h3>Community Spotter Network</h3>
+                    <div class="layer-icon">👥</div>
+                    <p>Engage fishermen, environmental activists, and coastal communities to report suspicious dumping activities with rewards.</p>
+                    <ul class="layer-features">
+                        <li>✓ Anonymous reporting system</li>
+                        <li>✓ ₹500 reward per verified report</li>
+                        <li>✓ Mobile app integration</li>
+                        <li>✓ Photo/video evidence support</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Layer 3 -->
+            <div class="layer-card">
+                <div class="layer-header layer-3">
+                    <div class="layer-number">3</div>
+                </div>
+                <div class="layer-content">
+                    <h3>Coast Guard Coordination</h3>
+                    <div class="layer-icon">🛡️</div>
+                    <p>Real-time coordination with coast guard for targeted inspections of high-risk vessels and law enforcement actions.</p>
+                    <ul class="layer-features">
+                        <li>✓ Instant alert transmission</li>
+                        <li>✓ Patrol route optimization</li>
+                        <li>✓ Inspection documentation</li>
+                        <li>✓ Legal compliance tracking</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about">
+        <div class="about-container">
+            <h2>Why Ocean Guard?</h2>
+            <div class="about-grid">
+                <div class="about-card">
+                    <div class="about-icon">🌍</div>
+                    <h3>Protect Our Oceans</h3>
+                    <p>Marine plastic pollution threatens 1 million marine species annually. Ocean Guard provides the tools to prevent dumping at the source.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-icon">📊</div>
+                    <h3>Data-Driven Insights</h3>
+                    <p>AI-powered analytics identify dumping hotspots, track trends, and optimize enforcement resources for maximum impact.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-icon">💰</div>
+                    <h3>Economic Incentives</h3>
+                    <p>Reward clean behavior and community participation. Create sustainable economic models around ocean protection.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Ocean Guard</h4>
+                    <p>Protecting marine ecosystems through technology and community action.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#admin">Admin Dashboard</a></li>
+                        <li><a href="#fisher">Fisher Portal</a></li>
+                        <li><a href="#map">Live Map</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p>Email: info@oceanguard.org</p>
+                    <p>Phone: +91-XXX-XXX-XXXX</p>
+                    <p>Location: Gulf of Mannar, Tamil Nadu</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; <span id="year"></span> Ocean Guard. All rights reserved.</p>
+                <p>🌊 Protecting Marine Ecosystems 🌊</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
