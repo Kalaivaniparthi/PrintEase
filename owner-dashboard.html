@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Printease — Owner</title>
+  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon">🏛️</span>
+      <span>Printease</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-link active" data-section="sec-orders" href="#">
+        <i class="fa fa-table-list"></i><span>Orders</span>
+      </a>
+      <a class="nav-link" data-section="sec-pricing" href="#">
+        <i class="fa fa-tag"></i><span>Pricing</span>
+      </a>
+      <a class="nav-link" data-section="sec-inventory" href="#">
+        <i class="fa fa-box"></i><span>Inventory</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn btn-ghost btn-full" id="logoutBtn" type="button">
+        <i class="fa fa-right-from-bracket"></i><span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div>
+          <div class="topbar-title">Owner Dashboard</div>
+          <div class="topbar-sub muted">High-priority orders listed first by default.</div>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button id="darkToggle" class="dark-toggle" aria-label="Toggle dark mode">🌙</button>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- Stats -->
+      <div class="stats-grid section-gap">
+        <div class="stat-card">
+          <div class="stat-icon">📋</div>
+          <div class="stat-label">Orders today</div>
+          <div class="stat-value" id="statTotal">0</div>
+        </div>
+        <div class="stat-card" style="border-left:3px solid var(--red)">
+          <div class="stat-icon">⚡</div>
+          <div class="stat-label">High priority pending</div>
+          <div class="stat-value" id="statHighPending" style="color:var(--red)">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⏳</div>
+          <div class="stat-label">Normal pending</div>
+          <div class="stat-value" id="statNormPending">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">✅</div>
+          <div class="stat-label">Done today</div>
+          <div class="stat-value" id="statDone">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">💰</div>
+          <div class="stat-label">Revenue today</div>
+          <div class="stat-value" id="statRevenue">₹0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📦</div>
+          <div class="stat-label">Stock</div>
+          <div class="stat-value" id="statStock" style="font-size:16px">—</div>
+        </div>
+      </div>
+
+      <!-- ── Orders ── -->
+      <section id="sec-orders" class="section">
+        <div class="card">
+          <div class="card-header">
+            <h2><i class="fa fa-list"></i> All Orders</h2>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <span class="small muted" id="ownerOrderCount"></span>
+              <button class="btn btn-ghost btn-sm" id="ownerRefreshBtn">
+                <i class="fa fa-rotate-right"></i> Refresh
+              </button>
+              <button class="btn btn-amber btn-sm" id="exportCsvBtn">
+                <i class="fa fa-file-csv"></i> Export CSV
+              </button>
+            </div>
+          </div>
+          <div class="controls-row">
+            <input id="ownerSearch" type="text" placeholder="🔍 Search token or name…" style="min-width:180px" />
+            <select id="ownerFilterPriority">
+              <option value="all">All priorities</option>
+              <option value="high">⚡ High only</option>
+              <option value="normal">Normal only</option>
+            </select>
+            <select id="ownerFilterPrint">
+              <option value="all">All print</option>
+              <option value="pending">pending</option>
+              <option value="processing">processing</option>
+              <option value="completed">completed</option>
+              <option value="ready">ready</option>
+            </select>
+            <select id="ownerFilterDel">
+              <option value="all">All delivery</option>
+              <option value="not applicable">N/A</option>
+              <option value="order placed">order placed</option>
+              <option value="out for delivery">out for delivery</option>
+              <option value="delivered">delivered</option>
+            </select>
+            <select id="ownerSort">
+              <option value="desc">Priority ↑ then Newest</option>
+              <option value="asc">Priority ↑ then Oldest</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Priority</th>
+                  <th>Token</th>
+                  <th>Name / Role</th>
+                  <th>File</th>
+                  <th>Pages</th>
+                  <th>Total</th>
+                  <th>Method</th>
+                  <th>Block / Room</th>
+                  <th>Print</th>
+                  <th>Delivery</th>
+                  <th>Slot</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="ownerOrdersTbody">
+                <tr><td colspan="12" class="muted small" style="padding:20px;text-align:center">No orders yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="small muted" style="margin-top:8px">
+            <span class="badge badge-priority" style="font-size:10px">⚡ High Priority</span> rows = staff/teacher orders. Processed first.
+          </p>
+        </div>
+      </section>
+
+      <!-- ── Pricing ── -->
+      <section id="sec-pricing" class="section" hidden>
+        <div class="card" style="max-width:500px">
+          <div class="card-header"><h2><i class="fa fa-tag"></i> Pricing Settings</h2></div>
+          <div class="stack">
+            <div class="two-col">
+              <div class="field">
+                <label for="bwPrice">B&amp;W price / page (₹)</label>
+                <input id="bwPrice" type="number" min="0.5" step="0.5" />
+              </div>
+              <div class="field">
+                <label for="colourPrice">Colour price / page (₹)</label>
+                <input id="colourPrice" type="number" min="1" step="0.5" />
+              </div>
+            </div>
+            <div class="two-col">
+              <div class="field">
+                <label for="bulkThreshold">Bulk threshold (pages × copies)</label>
+                <input id="bulkThreshold" type="number" min="1" />
+              </div>
+              <div class="field">
+                <label for="bulkPercent">Bulk discount (%)</label>
+                <input id="bulkPercent" type="number" min="0" max="100" />
+              </div>
+            </div>
+            <button class="btn btn-primary" id="savePricingBtn">
+              <i class="fa fa-save"></i> Save Pricing
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Inventory ── -->
+      <section id="sec-inventory" class="section" hidden>
+        <div class="card" style="max-width:500px">
+          <div class="card-header"><h2><i class="fa fa-box"></i> Inventory</h2></div>
+          <div class="stack">
+            <div class="two-col">
+              <div class="field">
+                <label for="paperA4">A4 paper (sheets)</label>
+                <input id="paperA4" type="number" min="0" />
+              </div>
+              <div class="field">
+                <label for="paperA3">A3 paper (sheets)</label>
+                <input id="paperA3" type="number" min="0" />
+              </div>
+            </div>
+            <div class="two-col">
+              <div class="field">
+                <label for="tonerBW">B&amp;W toner (%)</label>
+                <input id="tonerBW" type="number" min="0" max="100" />
+              </div>
+              <div class="field">
+                <label for="tonerColour">Colour toner (%)</label>
+                <input id="tonerColour" type="number" min="0" max="100" />
+              </div>
+            </div>
+            <button class="btn btn-primary" id="saveInventoryBtn">
+              <i class="fa fa-save"></i> Save Inventory
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script type="module" src="./js/owner.js"></script>
+</body>
+</html>

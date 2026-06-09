@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Printease — Staff / Teacher</title>
+  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon">👩‍🏫</span>
+      <span>Printease</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-link active" data-section="sec-order" href="#">
+        <i class="fa fa-plus-circle"></i><span>New Order</span>
+      </a>
+      <a class="nav-link" data-section="sec-orders" href="#">
+        <i class="fa fa-list"></i><span>My Orders</span>
+      </a>
+      <a class="nav-link" data-section="sec-profile" href="#">
+        <i class="fa fa-user"></i><span>Profile</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn btn-ghost btn-full" id="logoutBtn" type="button">
+        <i class="fa fa-right-from-bracket"></i><span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div>
+          <div class="topbar-title">Staff Dashboard</div>
+          <div class="topbar-sub">Welcome, <strong id="welcomeName"></strong> &nbsp;<span class="badge badge-priority">⚡ Staff</span></div>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <span class="small muted" id="clockEl"></span>
+        <button id="darkToggle" class="dark-toggle" aria-label="Toggle dark mode">🌙</button>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- ── Place Order ── -->
+      <section id="sec-order" class="section">
+        <div class="card">
+          <div class="card-header">
+            <h2><i class="fa fa-print"></i> Place New Order</h2>
+          </div>
+
+          <!-- Priority banner -->
+          <div class="priority-banner" style="margin-bottom:14px">
+            <i class="fa fa-bolt"></i>
+            Your orders are marked <strong>High Priority</strong> and will be processed before student orders.
+          </div>
+
+          <form id="orderForm" class="stack">
+            <div class="field">
+              <label for="docName"><i class="fa fa-file-text"></i> Document name</label>
+              <input id="docName" type="text" placeholder="e.g. Exam Question Paper" required />
+            </div>
+
+            <div class="field">
+              <label for="fileInput"><i class="fa fa-upload"></i> Upload file (PDF auto-counts pages)</label>
+              <input id="fileInput" type="file" accept=".pdf,*/*" />
+              <div class="small muted" id="fileName">No file selected</div>
+            </div>
+
+            <div class="two-col">
+              <div class="field">
+                <label>Colour mode</label>
+                <div class="radio-group">
+                  <label><input type="radio" name="colourMode" value="bw" checked /> B&amp;W</label>
+                  <label><input type="radio" name="colourMode" value="colour" /> Colour</label>
+                </div>
+              </div>
+              <div class="field">
+                <label>Sides</label>
+                <div class="radio-group">
+                  <label><input type="radio" name="sideMode" value="single" checked /> Single</label>
+                  <label><input type="radio" name="sideMode" value="double" /> Double</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="three-col">
+              <div class="field">
+                <label for="pages">Pages <span id="pagesSpinner" class="spinner" hidden></span></label>
+                <input id="pages" type="number" min="1" value="1" required />
+              </div>
+              <div class="field">
+                <label for="copies">Copies</label>
+                <input id="copies" type="number" min="1" max="100" value="1" required />
+              </div>
+              <div class="field">
+                <label for="pageSize">Page size</label>
+                <select id="pageSize">
+                  <option value="A4">A4</option>
+                  <option value="A3">A3</option>
+                  <option value="Letter">Letter</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Binding</label>
+              <div class="radio-group">
+                <label><input type="radio" name="binding" value="none" checked /> No Binding (free)</label>
+                <label><input type="radio" name="binding" value="stapled" /> Stapled (free)</label>
+                <label><input type="radio" name="binding" value="spiral" /> Spiral Binding (+₹10)</label>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="specialInstr">Special instructions (optional)</label>
+              <textarea id="specialInstr" placeholder="e.g. confidential, urgent…"></textarea>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="field">
+              <label>Delivery method</label>
+              <div class="radio-group">
+                <label><input type="radio" name="deliveryMethod" value="pickup" checked /> 🏫 Pickup at Xerox Shop (free)</label>
+                <label><input type="radio" name="deliveryMethod" value="campus" /> 🚴 Campus Delivery (+₹30)</label>
+              </div>
+            </div>
+
+            <div class="delivery-section" id="deliverySection">
+              <div class="two-col">
+                <div class="field">
+                  <label for="block">Block / Building <span style="color:var(--red)">*</span></label>
+                  <input id="block" type="text" placeholder="e.g. Staff Block, Admin" />
+                </div>
+                <div class="field">
+                  <label for="roomNo">Room number <span style="color:var(--red)">*</span></label>
+                  <input id="roomNo" type="text" placeholder="e.g. Room 12, Office 3" />
+                </div>
+              </div>
+              <div class="field">
+                <label for="landmark">Landmark (optional)</label>
+                <input id="landmark" type="text" placeholder="e.g. Near principal's office" />
+              </div>
+              <div class="field">
+                <label for="deliverySlot">Delivery slot</label>
+                <select id="deliverySlot">
+                  <option value="Morning (9 AM – 12 PM)">Morning (9 AM – 12 PM)</option>
+                  <option value="Afternoon (12 PM – 4 PM)">Afternoon (12 PM – 4 PM)</option>
+                  <option value="Evening (4 PM – 8 PM)">Evening (4 PM – 8 PM)</option>
+                  <option value="Next Day">Next Day (any slot)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="price-box">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div>
+                  <div class="small muted">Estimated total</div>
+                  <div class="price-main" id="priceMain">₹—</div>
+                </div>
+                <span class="badge badge-priority">⚡ Priority</span>
+              </div>
+              <div class="price-breakdown" id="priceBreak"></div>
+            </div>
+
+            <button class="btn btn-primary btn-full" id="submitBtn" type="submit">
+                <i class="fa fa-bolt"></i> Place Priority Order
+              </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ── My Orders ── -->
+      <section id="sec-orders" class="section" hidden>
+        <div class="card">
+          <div class="card-header">
+            <h2><i class="fa fa-list"></i> My Orders</h2>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <span class="small muted" id="ordersCount"></span>
+              <button class="btn btn-ghost btn-sm" id="refreshOrdersBtn" type="button">
+                <i class="fa fa-rotate-right"></i> Refresh
+              </button>
+            </div>
+          </div>
+          <div class="controls-row">
+            <select id="filterPrint">
+              <option value="all">All print statuses</option>
+              <option value="pending">pending</option>
+              <option value="processing">processing</option>
+              <option value="completed">completed</option>
+              <option value="ready">ready</option>
+              <option value="cancelled">cancelled</option>
+            </select>
+            <select id="filterDelivery">
+              <option value="all">All delivery statuses</option>
+              <option value="not applicable">not applicable</option>
+              <option value="order placed">order placed</option>
+              <option value="out for delivery">out for delivery</option>
+              <option value="delivered">delivered</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Priority</th>
+                  <th>Token</th>
+                  <th>File</th>
+                  <th>Pages</th>
+                  <th>Total</th>
+                  <th>Print Status</th>
+                  <th>Delivery Status</th>
+                  <th>Location / Slot</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="ordersTbody">
+                <tr><td colspan="9" class="muted small" style="padding:20px;text-align:center">No orders yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="small muted" style="margin-top:10px">All your orders are <span class="badge badge-priority" style="font-size:10px">⚡ High Priority</span> — processed before student orders.</p>
+        </div>
+      </section>
+
+      <!-- ── Profile ── -->
+      <section id="sec-profile" class="section" hidden>
+        <div class="card" style="max-width:480px">
+          <div class="card-header"><h2><i class="fa fa-user"></i> Profile Settings</h2></div>
+          <form id="profileForm" class="stack">
+            <div class="field">
+              <label for="profilePhone">Phone number</label>
+              <input id="profilePhone" type="tel" placeholder="+91 00000 00000" />
+            </div>
+            <div class="field">
+              <label for="profileCollege">Department / College</label>
+              <input id="profileCollege" type="text" placeholder="e.g. Dept. of Computer Science" />
+            </div>
+            <button class="btn btn-primary" type="submit">
+              <i class="fa fa-save"></i> Save Profile
+            </button>
+          </form>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script type="module" src="./js/staff.js"></script>
+</body>
+</html>
