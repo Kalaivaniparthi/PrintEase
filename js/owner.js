@@ -8,6 +8,8 @@ import {
 
 const session = checkAuth('owner');
 if (!session) throw new Error('not authenticated');
+
+document.addEventListener('DOMContentLoaded', () => {
 initDarkMode('darkToggle');
 document.getElementById('logoutBtn').addEventListener('click', logout);
 
@@ -256,3 +258,5 @@ document.getElementById('exportCsvBtn').addEventListener('click', () => {
   a.click(); URL.revokeObjectURL(url);
   toast('CSV exported.', 'success');
 });
+
+}); // end DOMContentLoaded
